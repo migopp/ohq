@@ -75,7 +75,7 @@ const Home = `
 
 			<div id="queue-add">
 				<form
-					hx-post="/add"
+					hx-post="/queue"
 					hx-target="#queue-disp"
 					hx-swap="innerHTML"
 					hx-trigger="submit">
@@ -106,4 +106,9 @@ const QueueDisplay = `
 	<li>{{.ID}}</li>
 	{{end}}
 </ul>
+`
+const Err = `
+<p>
+	{{.Err}}
+</p>
 `

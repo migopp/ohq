@@ -7,3 +7,7 @@ import (
 type QueueContent struct {
 	Users []users.User
 }
+
+type ErrContent struct {
+	Err error
+}

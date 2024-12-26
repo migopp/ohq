@@ -18,7 +18,9 @@ func Spawn() error {
 	// We can just use the default router because there is
 	// absolutely nothing fancy going on here.
 	http.HandleFunc("GET /", getHome)
-	http.HandleFunc("POST /add", postAdd)
+	http.HandleFunc("GET /queue", getQueue)
+	http.HandleFunc("POST /queue", postQueue)
+	http.HandleFunc("DELETE /queue", deleteQueue)
 
 	// Boot up the server
 	//

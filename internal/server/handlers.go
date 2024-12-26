@@ -18,9 +18,18 @@ func getHome(w http.ResponseWriter, r *http.Request) {
 	templates.ServeTemplate(templates.Home, w, r, qc)
 }
 
-// `postAdd` serves a request to add a student to the queue.
-func postAdd(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("Serving `POST /add`\n")
+// `getQueue` seerves a request to view the queue.
+func getQueue(w http.ResponseWriter, r *http.Request) {
+	fmt.Printf("Serving `GET /queue`\n")
+	qc := templates.QueueContent{
+		Users: state.GlobalState.Queue,
+	}
+	templates.ServeTemplate(templates.QueueDisplay, w, r, qc)
+}
+
+// `postQueue` serves a request to add a student to the queue.
+func postQueue(w http.ResponseWriter, r *http.Request) {
+	fmt.Printf("Serving `POST /queue`\n")
 
 	// Extract user info and offer it to the queue
 	err := r.ParseForm()
@@ -46,4 +55,26 @@ func postAdd(w http.ResponseWriter, r *http.Request) {
 		Users: state.GlobalState.Queue,
 	}
 	templates.ServeTemplate(templates.QueueDisplay, w, r, qc)
+}
+
+// `deleteQueue` seerves a request to poll from the queue.
+func deleteQueue(w http.ResponseWriter, r *http.Request) {
+	fmt.Printf("Serving `DELETE /queue`\n")
+
+	// Poll from the queue (if possible)
+	_, err := state.GlobalState.Poll()
+	if err != nil {
+		// Failure -> throw the error to the frontend
+		ec := templates.ErrContent{
+			Err: err,
+		}
+		templates.ServeTemplate(templates.Err, w, r, ec)
+	}
+
+	// Serve the updates
+	qc := templates.QueueContent{
+		Users: state.GlobalState.Queue,
+	}
+	templates.ServeTemplate(templates.QueueDisplay, w, r, qc)
+
 }
