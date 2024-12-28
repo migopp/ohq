@@ -2,13 +2,13 @@ package server
 
 import (
 	"fmt"
-	"net/http"
+	"os"
+
+	"github.com/gin-gonic/gin"
 )
 
-// Server credentials
-//
-// Let's just hardcode the IP and port for simplicity.
-var serverAddress = "0.0.0.0:6969"
+// The actual server engine
+var engine gin.Engine
 
 // `Spawn` starts a server at a designated address on the
 // host machine. If there is a failure, it returns an `error`.
@@ -17,10 +17,14 @@ func Spawn() error {
 	//
 	// We can just use the default router because there is
 	// absolutely nothing fancy going on here.
-	http.HandleFunc("GET /", getHome)
-	http.HandleFunc("GET /queue", getQueue)
-	http.HandleFunc("POST /queue", postQueue)
-	http.HandleFunc("DELETE /queue", deleteQueue)
+	r := gin.Default()
+	r.GET("/", getHome)
+	r.GET("/queue", getQueue)
+	r.POST("/queue", postQueue)
+	r.DELETE("/queue", deleteQueue)
+
+	// Load the templates from `web/templates/` into the engine
+	r.LoadHTMLGlob("web/templates/*")
 
 	// Boot up the server
 	//
@@ -29,6 +33,7 @@ func Spawn() error {
 	//
 	// More info/example here:
 	// https://pkg.go.dev/net/http#ListenAndServeTLS
-	fmt.Printf("Starting server at %s \n", serverAddress)
-	return http.ListenAndServe(serverAddress, nil)
+	sa := fmt.Sprintf("%s:%s", os.Getenv("IP"), os.Getenv("PORT"))
+	fmt.Printf("Starting server at %s \n", sa)
+	return r.Run(sa)
 }
