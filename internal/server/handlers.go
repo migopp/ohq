@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/migopp/ohq/internal/state"
-	"github.com/migopp/ohq/internal/users"
+	"github.com/migopp/ohq/internal/students"
 )
 
 // `getHome` serves a request to fetch the home page.
@@ -26,9 +26,9 @@ func getQueue(c *gin.Context) {
 // `postQueue` serves a request to add a student to the queue.
 func postQueue(c *gin.Context) {
 	// Extract user info and offer it to the queue
-	id := c.Request.PostFormValue("qid")
-	u := users.User{
-		ID: id,
+	csid := c.Request.PostFormValue("qid")
+	u := students.Student{
+		CSID: csid,
 	}
 	state.GlobalState.Offer(u)
 
