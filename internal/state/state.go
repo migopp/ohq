@@ -7,32 +7,32 @@ import (
 )
 
 type State struct {
-	Queue []Entry
+	Queue []Session
 }
 
-func (s *State) Offer(e Entry) {
+func (s *State) Offer(se Session) {
 	if len(s.Queue) == 0 {
-		e.StartTime = time.Now()
+		se.StartTime = time.Now()
 	}
-	s.Queue = append(s.Queue, e)
+	s.Queue = append(s.Queue, se)
 }
 
-func (s *State) Poll() (Entry, error) {
+func (s *State) Poll() (Session, error) {
 	if len(s.Queue) == 0 {
-		var e Entry
-		return e, errors.New("Attempted `Poll` on empty queue")
+		var se Session
+		return se, errors.New("Attempted `Poll` on empty queue")
 	}
-	e, r := s.Queue[0], s.Queue[1:]
+	se, r := s.Queue[0], s.Queue[1:]
 	s.Queue = r
 	if len(s.Queue) != 0 {
 		s.Queue[0].StartTime = time.Now()
 	}
-	return e, nil
+	return se, nil
 }
 
 func (s *State) Debug() {
-	for idx, e := range s.Queue {
-		fmt.Printf("idx: %d, e.CSID: %s\n", idx, e.CSID)
+	for idx, se := range s.Queue {
+		fmt.Printf("idx: %d, se.CSID: %s\n", idx, se.CSID)
 	}
 }
 

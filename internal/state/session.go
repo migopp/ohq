@@ -2,7 +2,8 @@ package state
 
 import "time"
 
-type Entry struct {
+type Session struct {
 	CSID      string
+	Admin     bool
 	StartTime time.Time
 }

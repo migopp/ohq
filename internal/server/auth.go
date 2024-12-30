@@ -9,6 +9,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+
+	"github.com/migopp/ohq/internal/state"
 )
 
 // `getAuth` fetches the `Authorization` cookie, used for such a purpose.
@@ -17,16 +19,16 @@ func getAuth(c *gin.Context) (string, error) {
 	return c.Cookie("Authorization")
 }
 
-// `getClaims` parses the user's `Authorization` cookie to fetch their JWT,
-// then parsing it and returning the map of claims within.
-func getClaims(c *gin.Context) (jwt.MapClaims, error) {
-	var claims jwt.MapClaims
+// `getSession` parses the user's `Authorization` cookie to fetch their JWT,
+// then parsing it and returning the session within.
+func getSession(c *gin.Context) (state.Session, error) {
+	var session state.Session
 	var err error
 
 	// Pick up `Authorization` from cookies
 	toks, err := c.Cookie("Authorization")
 	if err != nil {
-		return claims, err
+		return session, err
 	}
 
 	// Parse the JWT
@@ -37,16 +39,24 @@ func getClaims(c *gin.Context) (jwt.MapClaims, error) {
 		return []byte(os.Getenv("SECRET")), nil
 	})
 	if err != nil {
-		return claims, err
+		return session, err
 	}
 
-	// Toss up the claims
-	claims, _ = tok.Claims.(jwt.MapClaims)
-	return claims, err
+	// Get the claims, then parse them for useful info and pluck into session
+	claims, _ := tok.Claims.(jwt.MapClaims)
+	csid, cok := claims["csid"].(string)
+	admin, aok := claims["admin"].(bool)
+	if !cok || !aok {
+		return session, fmt.Errorf("Invalid claims")
+	}
+	return state.Session{
+		CSID:  csid,
+		Admin: admin,
+	}, err
 }
 
-// `loginAuth` is middleware that ensures a user is logged in (has an
-// appropriate session with the server) before they gain access to a page.
+// `loginAuth` is middleware that ensures a user is logged in (has an appropriate
+// session with the server) before they gain access to a page or functionality.
 func loginAuth(c *gin.Context) {
 	// Pick up `Authorization` from cookies
 	toks, err := c.Cookie("Authorization")
@@ -89,6 +99,27 @@ func loginAuth(c *gin.Context) {
 			return
 		}
 	} else {
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	// Move on along
+	c.Next()
+}
+
+// `adminAuth` is middleware that ensures a user is an admin before they gain access
+// to a page or functionality.
+func adminAuth(c *gin.Context) {
+	// Get session
+	se, err := getSession(c)
+	if err != nil {
+		c.Header("hx-redirect", "/login")
+		c.Status(http.StatusOK)
+		return
+	}
+
+	// Ensure admin
+	if !se.Admin {
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}

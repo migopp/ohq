@@ -54,9 +54,9 @@ func postLogin(c *gin.Context) {
 
 	// Generate and attach JWT
 	tok := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub": u.Username,
-		"exp": time.Now().Add(time.Hour * 24).Unix(),
-		"onq": false,
+		"exp":   time.Now().Add(time.Hour * 24).Unix(),
+		"csid":  u.Username,
+		"admin": u.Admin,
 	})
 	toks, err := tok.SignedString([]byte(os.Getenv("SECRET")))
 	if err != nil {
@@ -67,6 +67,7 @@ func postLogin(c *gin.Context) {
 		return
 	}
 	c.SetSameSite(http.SameSiteLaxMode)
+	// TODO: Protect this?
 	c.SetCookie("Authorization", toks, 3600*24, "", "", false, true)
 
 	// Redirect to `/`
@@ -85,7 +86,7 @@ func getQueue(c *gin.Context) {
 // `postQueue` serves a request to add a student to the queue.
 func postQueue(c *gin.Context) {
 	// Extract user info and offer it to the queue
-	claims, err := getClaims(c)
+	se, err := getSession(c)
 	if err != nil {
 		// Unable to fetch the claims -- likely a bad JWT,
 		// so re-login may fix it.
@@ -93,17 +94,7 @@ func postQueue(c *gin.Context) {
 		c.Status(http.StatusOK)
 		return
 	}
-	csid, ok := claims["sub"].(string)
-	if !ok {
-		// Again, bad JWT. Try re-login.
-		c.Header("hx-redirect", "/login")
-		c.Status(http.StatusOK)
-		return
-	}
-	e := state.Entry{
-		CSID: csid,
-	}
-	state.GlobalState.Offer(e)
+	state.GlobalState.Offer(se)
 
 	// Serve the updates to the home page
 	//
@@ -116,7 +107,7 @@ func postQueue(c *gin.Context) {
 	})
 }
 
-// `deleteQueue` seerves a request to poll from the queue.
+// `deleteQueue` serves a request to poll from the queue.
 func deleteQueue(c *gin.Context) {
 	// Poll from the queue (if possible)
 	_, err := state.GlobalState.Poll()
@@ -132,5 +123,12 @@ func deleteQueue(c *gin.Context) {
 	c.HTML(http.StatusOK, "main.tmpl.html", gin.H{
 		"Component": "qc",
 		"Users":     state.GlobalState.Queue,
+	})
+}
+
+// `getAdmin` serves a request to see if the user is an admin.
+func getAdmin(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"Confirmation": "HELLO ADMIN!",
 	})
 }
