@@ -39,6 +39,20 @@ func (s *State) OnQueue(se Session) bool {
 	return false
 }
 
+func (s *State) TopTime() string {
+	if len(s.Queue) == 0 {
+		return ""
+	}
+	rsecs := uint64(time.Since(s.Queue[0].StartTime).Seconds())
+	mins := rsecs / 60
+	secs := rsecs % 60
+	if mins >= 1 {
+		return fmt.Sprintf("%dm %ds", mins, secs)
+	} else {
+		return fmt.Sprintf("%ds", secs)
+	}
+}
+
 func (s *State) Debug() {
 	for idx, se := range s.Queue {
 		fmt.Printf("idx: %d, se.CSID: %s\n", idx, se.CSID)

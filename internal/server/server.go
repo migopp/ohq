@@ -28,7 +28,7 @@ func Spawn() error {
 	// Load the templates from `web/templates/` into the engine,
 	// as well as `web/components/`, and static assets
 	r.Static("/static", "./web/static/")
-	r.LoadHTMLGlob("web/templates/*.html")
+	r.LoadHTMLGlob("web/templates/*")
 
 	// Boot up the server
 	//

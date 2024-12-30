@@ -1,0 +1,8 @@
+{{define "components/home"}}
+	<div id="queue-disp" hx-get="/queue" hx-trigger="every 1s" hx-swap="innerHTML">
+		{{template "components/qc" .}}
+	</div>
+	<div id="queue-add">
+  		{{if not .OnQueue}} {{template "components/qa" .}} {{end}}
+	</div>
+{{end}}

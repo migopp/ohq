@@ -61,8 +61,8 @@ func loginAuth(c *gin.Context) {
 	// Pick up `Authorization` from cookies
 	toks, err := c.Cookie("Authorization")
 	if err != nil {
-		c.Header("hx-redirect", "/login")
-		c.Status(http.StatusOK)
+		// Plain HTTP redirection
+		http.Redirect(c.Writer, c.Request, "/login", http.StatusFound)
 		return
 	}
 
@@ -87,15 +87,13 @@ func loginAuth(c *gin.Context) {
 			if time.Now().After(expt) {
 				// Need to re-login
 				log.Println("JWT expired. Need to re-login.")
-				c.Header("hx-redirect", "/login")
-				c.Status(http.StatusOK)
+				http.Redirect(c.Writer, c.Request, "/login", http.StatusFound)
 				return
 			}
 		} else {
 			// Need to re-login
 			log.Println("JWT `exp` claim is missing or not valid")
-			c.Header("hx-redirect", "/login")
-			c.Status(http.StatusOK)
+			http.Redirect(c.Writer, c.Request, "/login", http.StatusFound)
 			return
 		}
 	} else {
@@ -113,8 +111,7 @@ func adminAuth(c *gin.Context) {
 	// Get session
 	se, err := getSession(c)
 	if err != nil {
-		c.Header("hx-redirect", "/login")
-		c.Status(http.StatusOK)
+		http.Redirect(c.Writer, c.Request, "/login", http.StatusFound)
 		return
 	}
 

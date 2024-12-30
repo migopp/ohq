@@ -1,0 +1,15 @@
+{{define "components/qc"}}
+	{{if gt (len .Users) 0}}
+		{{$first := index .Users 0}}
+		<p id="first">{{$first.CSID}} {{.TopTime}}</p>
+		<ol>
+			{{range $i, $user := .Users}}
+				{{if gt $i 0}}
+					<li>{{$user.CSID}}</li>
+				{{end}}
+			{{end}}
+		</ol>
+	{{else}}
+		<p>The queue is empty.</p>
+	{{end}}
+{{end}}

@@ -1,7 +1,6 @@
 package server
 
 import (
-	"log"
 	"net/http"
 	"os"
 	"time"
@@ -25,19 +24,19 @@ func getHome(c *gin.Context) {
 		c.Status(http.StatusOK)
 		return
 	}
-	log.Printf("%s ON THE QUEUE: %v\n", se.CSID, state.GlobalState.OnQueue(se))
 
 	// Send response
-	c.HTML(http.StatusOK, "main.tmpl.html", gin.H{
+	c.HTML(http.StatusOK, "main.go.tmpl", gin.H{
 		"Component": "home",
 		"Users":     state.GlobalState.Queue,
+		"TopTime":   state.GlobalState.TopTime(),
 		"OnQueue":   state.GlobalState.OnQueue(se),
 	})
 }
 
 // `getLogin` serves a request to view the login page.
 func getLogin(c *gin.Context) {
-	c.HTML(http.StatusOK, "main.tmpl.html", gin.H{
+	c.HTML(http.StatusOK, "main.go.tmpl", gin.H{
 		"Component": "login",
 	})
 }
@@ -89,8 +88,9 @@ func postLogin(c *gin.Context) {
 
 // `getQueue` seerves a request to view the queue.
 func getQueue(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"Students": state.GlobalState.Queue,
+	c.HTML(http.StatusOK, "components/qc", gin.H{
+		"Users":   state.GlobalState.Queue,
+		"TopTime": state.GlobalState.TopTime(),
 	})
 }
 
@@ -115,6 +115,7 @@ func postQueue(c *gin.Context) {
 	// contents in the DOM.
 	c.HTML(http.StatusOK, "components/home", gin.H{
 		"Users":   state.GlobalState.Queue,
+		"TopTime": state.GlobalState.TopTime(),
 		"OnQueue": state.GlobalState.OnQueue(se),
 	})
 }
@@ -129,12 +130,6 @@ func deleteQueue(c *gin.Context) {
 		})
 		return
 	}
-
-	// Serve the updates
-	c.HTML(http.StatusOK, "main.tmpl.html", gin.H{
-		"Component": "qc",
-		"Users":     state.GlobalState.Queue,
-	})
 }
 
 // `getAdmin` serves a request to see if the user is an admin.

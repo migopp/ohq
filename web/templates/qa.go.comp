@@ -1,0 +1,10 @@
+{{define "components/qa"}}
+	<form
+		hx-post="/queue"
+		hx-target="#main-content"
+		hx-swap="innerHTML"
+		hx-trigger="submit"
+		>
+			<button type="submit">Enqueue</button>
+	</form>
+{{end}}
