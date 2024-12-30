@@ -4,7 +4,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 
+	"github.com/migopp/ohq/internal/db"
 	"github.com/migopp/ohq/internal/state"
 	"github.com/migopp/ohq/internal/students"
 )
@@ -14,6 +16,41 @@ func getHome(c *gin.Context) {
 	c.HTML(http.StatusOK, "home.html", gin.H{
 		"Users": state.GlobalState.Queue,
 	})
+}
+
+// `getLogin` serves a request to view the login page.
+func getLogin(c *gin.Context) {
+	c.HTML(http.StatusOK, "login.html", gin.H{})
+}
+
+// `postLogin` serves a request to login to the `ohq` system.
+func postLogin(c *gin.Context) {
+	// Extract login details
+	un := c.PostForm("username")
+	pw := c.PostForm("password")
+
+	// Fetch from DB and verify credentials
+	var u db.User
+	if err := db.FetchUserWithName(&u, un); err != nil {
+		c.HTML(http.StatusOK, "err.html", gin.H{
+			"Err": err,
+		})
+		return
+	}
+	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(pw))
+	if err != nil {
+		c.HTML(http.StatusOK, "err.html", gin.H{
+			"Err": err,
+		})
+		return
+	}
+
+	// Generate and attach JWT
+
+	// Redirect to `/`
+	c.Header("hx-redirect", "/")
+	c.Status(http.StatusOK)
+	return
 }
 
 // `getQueue` seerves a request to view the queue.
@@ -51,6 +88,7 @@ func deleteQueue(c *gin.Context) {
 		c.HTML(http.StatusInternalServerError, "err.html", gin.H{
 			"Err": err,
 		})
+		return
 	}
 
 	// Serve the updates

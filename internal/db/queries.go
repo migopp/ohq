@@ -7,8 +7,17 @@ func CreateUser(u *User) error {
 	return r.Error
 }
 
-// `FetchUserWithID` fetches `u` from the SQLite DB,
-// updating `u` if successful, and returning an error if not.
+// `FetchUserWithID` fetches `u` with name `un` from the
+// SQLite DB, updating `u` if successful, and returning
+// an error if not.
+func FetchUserWithName(u *User, un string) error {
+	r := db.Where("username = ?", un).First(u)
+	return r.Error
+}
+
+// `FetchUserWithID` fetches `u` with id `id` from the
+// SQLite DB, updating `u` if successful, and returning
+// an error if not.
 func FetchUserWithID(u *User, id uint) error {
 	r := db.First(u, id)
 	return r.Error

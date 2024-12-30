@@ -26,3 +26,14 @@ func Spawn() {
 		log.Fatal("Failed to migrate model `User`")
 	}
 }
+
+func Close() {
+	sdb, err := db.DB()
+	if err != nil {
+		log.Fatal("Failed to close DB connection")
+	}
+	if err := sdb.Close(); err != nil {
+		log.Fatal("Failed to close DB connection")
+	}
+	log.Println("DB connection closed")
+}

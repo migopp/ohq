@@ -1,0 +1,36 @@
+body {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2vh;
+}
+
+header {
+  margin: 0 0 3vh 0;
+  padding: 0;
+}
+
+header p {
+  font-weight: bold;
+  font-size: 2rem;
+  margin: 0;
+  padding: 0;
+}
+
+#queue-disp,
+#queue-add {
+  margin-bottom: 2rem;
+}
+
+footer {
+  display: flex;
+  justify-content: flex-start;
+}
+
+footer div {
+  margin: 0 0 0 0.5rem;
+}
+
+footer a {
+  text-decoration: none;
+  color: black;
+}

@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/migopp/ohq/internal/db"
+	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/yaml.v3"
 )
 
@@ -28,8 +29,17 @@ func Load() {
 
 	// Load student data into the DB
 	for _, s := range students {
+		// Encrypt `pass`
+		epass, err := bcrypt.GenerateFromPassword([]byte(s.Password), 10)
+		if err != nil {
+			log.Fatalf("Failed to encrypt password: %v", err)
+		}
+		s.Password = string(epass)
+
+		// Insert data
 		u := db.User{
 			Username: s.CSID,
+			Password: s.Password,
 		}
 		db.CreateUser(&u)
 	}

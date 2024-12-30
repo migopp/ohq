@@ -15,10 +15,13 @@ var engine gin.Engine
 func Spawn() error {
 	// Configure the router
 	//
-	// We can just use the default router because there is
-	// absolutely nothing fancy going on here.
+	// This includes locating the static assets as well as setting
+	// up the controllers for each acceptable request type.
 	r := gin.Default()
+	r.Static("/static", "./web/static/")
 	r.GET("/", getHome)
+	r.GET("/login", getLogin)
+	r.POST("/login", postLogin)
 	r.GET("/queue", getQueue)
 	r.POST("/queue", postQueue)
 	r.DELETE("/queue", deleteQueue)

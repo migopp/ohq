@@ -2,6 +2,9 @@ package main
 
 import (
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/joho/godotenv"
 
@@ -28,6 +31,20 @@ func init() {
 
 // Server entry
 func main() {
+	// Set up an exit channel
+	//
+	// When I send a SIGTERM to this server,
+	// I want it to exit gracefully. So I'll have to
+	// set that up here.
+	sc := make(chan os.Signal, 1)
+	signal.Notify(sc, os.Interrupt, syscall.SIGTERM)
+	go func() { // `deinit`
+		<-sc
+		log.Println("Executing `deinit`")
+		db.Close()
+		os.Exit(0)
+	}()
+
 	// Load student list
 	if cli.LSL {
 		students.Load()
