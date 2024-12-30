@@ -7,7 +7,7 @@ func Init() {
 		&LSL,
 		"lsl",
 		false,
-		"",
+		"Load student data from `students.yaml`",
 	)
 	flag.Parse()
 }

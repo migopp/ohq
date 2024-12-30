@@ -8,7 +8,6 @@ import (
 
 	"github.com/migopp/ohq/internal/db"
 	"github.com/migopp/ohq/internal/state"
-	"github.com/migopp/ohq/internal/students"
 )
 
 // `getHome` serves a request to fetch the home page.
@@ -55,8 +54,8 @@ func postLogin(c *gin.Context) {
 
 // `getQueue` seerves a request to view the queue.
 func getQueue(c *gin.Context) {
-	c.HTML(http.StatusOK, "queue_content.html", gin.H{
-		"Users": state.GlobalState.Queue,
+	c.JSON(http.StatusOK, gin.H{
+		"Students": state.GlobalState.Queue,
 	})
 }
 
@@ -64,10 +63,10 @@ func getQueue(c *gin.Context) {
 func postQueue(c *gin.Context) {
 	// Extract user info and offer it to the queue
 	csid := c.Request.PostFormValue("qid")
-	u := students.Student{
+	e := state.Entry{
 		CSID: csid,
 	}
-	state.GlobalState.Offer(u)
+	state.GlobalState.Offer(e)
 
 	// Serve the updates to the home page
 	//

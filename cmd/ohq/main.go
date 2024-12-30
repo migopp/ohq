@@ -11,7 +11,6 @@ import (
 	"github.com/migopp/ohq/internal/cli"
 	"github.com/migopp/ohq/internal/db"
 	"github.com/migopp/ohq/internal/server"
-	"github.com/migopp/ohq/internal/students"
 )
 
 // System initialization
@@ -47,7 +46,7 @@ func main() {
 
 	// Load student list
 	if cli.LSL {
-		students.Load()
+		db.LoadFromFile("students.yaml")
 	}
 
 	// Spawn the server

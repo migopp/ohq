@@ -3,31 +3,37 @@ package state
 import (
 	"errors"
 	"fmt"
-
-	"github.com/migopp/ohq/internal/students"
+	"time"
 )
 
 type State struct {
-	Queue []students.Student
+	Queue []Entry
 }
 
-func (s *State) Offer(u students.Student) {
-	s.Queue = append(s.Queue, u)
-}
-
-func (s *State) Poll() (students.Student, error) {
+func (s *State) Offer(e Entry) {
 	if len(s.Queue) == 0 {
-		var u students.Student
-		return u, errors.New("Attempted `Poll` on empty queue")
+		e.StartTime = time.Now()
 	}
-	u, r := s.Queue[0], s.Queue[1:]
+	s.Queue = append(s.Queue, e)
+}
+
+// TODO: Set start time for new leader
+func (s *State) Poll() (Entry, error) {
+	if len(s.Queue) == 0 {
+		var e Entry
+		return e, errors.New("Attempted `Poll` on empty queue")
+	}
+	e, r := s.Queue[0], s.Queue[1:]
 	s.Queue = r
-	return u, nil
+	if len(s.Queue) != 0 {
+		s.Queue[0].StartTime = time.Now()
+	}
+	return e, nil
 }
 
 func (s *State) Debug() {
-	for idx, u := range s.Queue {
-		fmt.Printf("idx: %d, u.id: %s\n", idx, u.CSID)
+	for idx, e := range s.Queue {
+		fmt.Printf("idx: %d, e.CSID: %s\n", idx, e.CSID)
 	}
 }
 
