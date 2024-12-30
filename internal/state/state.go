@@ -30,6 +30,15 @@ func (s *State) Poll() (Session, error) {
 	return se, nil
 }
 
+func (s *State) OnQueue(se Session) bool {
+	for _, qse := range s.Queue {
+		if se.CSID == qse.CSID {
+			return true
+		}
+	}
+	return false
+}
+
 func (s *State) Debug() {
 	for idx, se := range s.Queue {
 		fmt.Printf("idx: %d, se.CSID: %s\n", idx, se.CSID)

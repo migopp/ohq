@@ -1,6 +1,7 @@
 package server
 
 import (
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -15,9 +16,22 @@ import (
 
 // `getHome` serves a request to fetch the home page.
 func getHome(c *gin.Context) {
+	// Get session context
+	se, err := getSession(c)
+	if err != nil {
+		// Unable to fetch the claims -- likely a bad JWT,
+		// so re-login may fix it.
+		c.Header("hx-redirect", "/login")
+		c.Status(http.StatusOK)
+		return
+	}
+	log.Printf("%s ON THE QUEUE: %v\n", se.CSID, state.GlobalState.OnQueue(se))
+
+	// Send response
 	c.HTML(http.StatusOK, "main.tmpl.html", gin.H{
 		"Component": "home",
 		"Users":     state.GlobalState.Queue,
+		"OnQueue":   state.GlobalState.OnQueue(se),
 	})
 }
 
@@ -99,8 +113,9 @@ func postQueue(c *gin.Context) {
 	// We have a hook that leads here in the HTMX, and
 	// so whatever we write here replaces the current
 	// contents in the DOM.
-	c.HTML(http.StatusOK, "components/qc", gin.H{
-		"Users": state.GlobalState.Queue,
+	c.HTML(http.StatusOK, "components/home", gin.H{
+		"Users":   state.GlobalState.Queue,
+		"OnQueue": state.GlobalState.OnQueue(se),
 	})
 }
 
