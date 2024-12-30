@@ -37,17 +37,15 @@ func postLogin(c *gin.Context) {
 	// Fetch from DB and verify credentials
 	u, err := db.FetchUserWithName(un)
 	if err != nil {
-		c.HTML(http.StatusOK, "main.tmpl.html", gin.H{
-			"Component": "err",
-			"Err":       err,
+		c.HTML(http.StatusOK, "components/err", gin.H{
+			"Err": err,
 		})
 		return
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(pw))
 	if err != nil {
-		c.HTML(http.StatusOK, "main.tmpl.html", gin.H{
-			"Component": "err",
-			"Err":       err,
+		c.HTML(http.StatusOK, "components/err", gin.H{
+			"Err": err,
 		})
 		return
 	}
@@ -60,9 +58,8 @@ func postLogin(c *gin.Context) {
 	})
 	toks, err := tok.SignedString([]byte(os.Getenv("SECRET")))
 	if err != nil {
-		c.HTML(http.StatusOK, "main.tmpl.html", gin.H{
-			"Component": "err",
-			"Err":       err,
+		c.HTML(http.StatusOK, "components/err", gin.H{
+			"Err": err,
 		})
 		return
 	}
@@ -112,9 +109,8 @@ func deleteQueue(c *gin.Context) {
 	// Poll from the queue (if possible)
 	_, err := state.GlobalState.Poll()
 	if err != nil {
-		c.HTML(http.StatusInternalServerError, "main.tmpl.html", gin.H{
-			"Component": "err",
-			"Err":       err,
+		c.HTML(http.StatusOK, "components/err", gin.H{
+			"Err": err,
 		})
 		return
 	}
