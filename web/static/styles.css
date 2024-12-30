@@ -5,7 +5,7 @@ body {
 }
 
 header {
-  margin: 0 0 3vh 0;
+  margin: 0 0 2vh 0;
   padding: 0;
 }
 
@@ -16,18 +16,13 @@ header p {
   padding: 0;
 }
 
-#queue-disp,
-#queue-add {
-  margin-bottom: 2rem;
+#main-content {
+  margin-bottom: 2vh;
 }
 
-footer {
+#login-form {
   display: flex;
-  justify-content: flex-start;
-}
-
-footer div {
-  margin: 0 0 0 0.5rem;
+  flex-direction: columns;
 }
 
 footer a {
