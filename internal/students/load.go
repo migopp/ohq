@@ -1,7 +1,6 @@
 package students
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -42,12 +41,5 @@ func Load() {
 			Password: s.Password,
 		}
 		db.CreateUser(&u)
-	}
-
-	// Fetch all to debug
-	var u []db.User
-	db.FetchAllUsers(&u)
-	for _, s := range u {
-		fmt.Printf("USER FOUND: %+v\n\n", s)
 	}
 }

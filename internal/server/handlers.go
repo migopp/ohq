@@ -30,14 +30,14 @@ func postLogin(c *gin.Context) {
 	pw := c.PostForm("password")
 
 	// Fetch from DB and verify credentials
-	var u db.User
-	if err := db.FetchUserWithName(&u, un); err != nil {
+	u, err := db.FetchUserWithName(un)
+	if err != nil {
 		c.HTML(http.StatusOK, "err.html", gin.H{
 			"Err": err,
 		})
 		return
 	}
-	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(pw))
+	err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(pw))
 	if err != nil {
 		c.HTML(http.StatusOK, "err.html", gin.H{
 			"Err": err,
