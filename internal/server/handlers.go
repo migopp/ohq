@@ -15,14 +15,17 @@ import (
 
 // `getHome` serves a request to fetch the home page.
 func getHome(c *gin.Context) {
-	c.HTML(http.StatusOK, "home.html", gin.H{
-		"Users": state.GlobalState.Queue,
+	c.HTML(http.StatusOK, "main.tmpl.html", gin.H{
+		"Component": "home",
+		"Users":     state.GlobalState.Queue,
 	})
 }
 
 // `getLogin` serves a request to view the login page.
 func getLogin(c *gin.Context) {
-	c.HTML(http.StatusOK, "login.html", gin.H{})
+	c.HTML(http.StatusOK, "main.tmpl.html", gin.H{
+		"Component": "login",
+	})
 }
 
 // `postLogin` serves a request to login to the `ohq` system.
@@ -34,28 +37,32 @@ func postLogin(c *gin.Context) {
 	// Fetch from DB and verify credentials
 	u, err := db.FetchUserWithName(un)
 	if err != nil {
-		c.HTML(http.StatusOK, "err.html", gin.H{
-			"Err": err,
+		c.HTML(http.StatusOK, "main.tmpl.html", gin.H{
+			"Component": "err",
+			"Err":       err,
 		})
 		return
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(pw))
 	if err != nil {
-		c.HTML(http.StatusOK, "err.html", gin.H{
-			"Err": err,
+		c.HTML(http.StatusOK, "main.tmpl.html", gin.H{
+			"Component": "err",
+			"Err":       err,
 		})
 		return
 	}
 
 	// Generate and attach JWT
 	tok := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub": u.ID,
+		"sub": u.Username,
 		"exp": time.Now().Add(time.Hour * 24).Unix(),
+		"onq": false,
 	})
 	toks, err := tok.SignedString([]byte(os.Getenv("SECRET")))
 	if err != nil {
-		c.HTML(http.StatusOK, "err.html", gin.H{
-			"Err": err,
+		c.HTML(http.StatusOK, "main.tmpl.html", gin.H{
+			"Component": "err",
+			"Err":       err,
 		})
 		return
 	}
@@ -78,7 +85,21 @@ func getQueue(c *gin.Context) {
 // `postQueue` serves a request to add a student to the queue.
 func postQueue(c *gin.Context) {
 	// Extract user info and offer it to the queue
-	csid := c.Request.PostFormValue("qid")
+	claims, err := getClaims(c)
+	if err != nil {
+		// Unable to fetch the claims -- likely a bad JWT,
+		// so re-login may fix it.
+		c.Header("hx-redirect", "/login")
+		c.Status(http.StatusOK)
+		return
+	}
+	csid, ok := claims["sub"].(string)
+	if !ok {
+		// Again, bad JWT. Try re-login.
+		c.Header("hx-redirect", "/login")
+		c.Status(http.StatusOK)
+		return
+	}
 	e := state.Entry{
 		CSID: csid,
 	}
@@ -90,7 +111,7 @@ func postQueue(c *gin.Context) {
 	// We have a hook that leads here in the HTMX, and
 	// so whatever we write here replaces the current
 	// contents in the DOM.
-	c.HTML(http.StatusOK, "queue_content.html", gin.H{
+	c.HTML(http.StatusOK, "components/qc", gin.H{
 		"Users": state.GlobalState.Queue,
 	})
 }
@@ -100,14 +121,16 @@ func deleteQueue(c *gin.Context) {
 	// Poll from the queue (if possible)
 	_, err := state.GlobalState.Poll()
 	if err != nil {
-		c.HTML(http.StatusInternalServerError, "err.html", gin.H{
-			"Err": err,
+		c.HTML(http.StatusInternalServerError, "main.tmpl.html", gin.H{
+			"Component": "err",
+			"Err":       err,
 		})
 		return
 	}
 
 	// Serve the updates
-	c.HTML(http.StatusOK, "queue_content.html", gin.H{
-		"Users": state.GlobalState.Queue,
+	c.HTML(http.StatusOK, "main.tmpl.html", gin.H{
+		"Component": "qc",
+		"Users":     state.GlobalState.Queue,
 	})
 }

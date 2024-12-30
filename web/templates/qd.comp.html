@@ -1,0 +1,10 @@
+{{define "components/qd"}}
+<form
+  hx-delete="/queue"
+  hx-target="#queue-disp"
+  hx-swap="innerHTML"
+  hx-trigger="submit"
+>
+  <button type="submit">Dequeue</button>
+</form>
+{{end}}
