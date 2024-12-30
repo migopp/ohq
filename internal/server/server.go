@@ -23,8 +23,8 @@ func Spawn() error {
 	r.GET("/login", getLogin)
 	r.POST("/login", postLogin)
 	r.GET("/queue", getQueue)
-	r.POST("/queue", postQueue)
-	r.DELETE("/queue", deleteQueue)
+	r.POST("/queue", requireAuth, postQueue)
+	r.DELETE("/queue", requireAuth, deleteQueue)
 
 	// Load the templates from `web/templates/` into the engine
 	r.LoadHTMLGlob("web/templates/*")

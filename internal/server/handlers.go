@@ -2,8 +2,11 @@ package server
 
 import (
 	"net/http"
+	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/migopp/ohq/internal/db"
@@ -45,6 +48,19 @@ func postLogin(c *gin.Context) {
 	}
 
 	// Generate and attach JWT
+	tok := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub": u.ID,
+		"exp": time.Now().Add(time.Hour * 24).Unix(),
+	})
+	toks, err := tok.SignedString([]byte(os.Getenv("SECRET")))
+	if err != nil {
+		c.HTML(http.StatusOK, "err.html", gin.H{
+			"Err": err,
+		})
+		return
+	}
+	c.SetSameSite(http.SameSiteLaxMode)
+	c.SetCookie("Authorization", toks, 3600*24, "", "", false, true)
 
 	// Redirect to `/`
 	c.Header("hx-redirect", "/")

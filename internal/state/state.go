@@ -17,7 +17,6 @@ func (s *State) Offer(e Entry) {
 	s.Queue = append(s.Queue, e)
 }
 
-// TODO: Set start time for new leader
 func (s *State) Poll() (Entry, error) {
 	if len(s.Queue) == 0 {
 		var e Entry
