@@ -16,6 +16,7 @@ func Spawn() error {
 	// Configure the router
 	//
 	// Basically, set up the controllers for each acceptable request type.
+	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	r.GET("/", loginAuth, getHome)
 	r.GET("/login", getLogin)
@@ -37,6 +38,7 @@ func Spawn() error {
 	//
 	// More info/example here:
 	// https://pkg.go.dev/net/http#ListenAndServeTLS
+	r.SetTrustedProxies(nil)
 	sa := fmt.Sprintf("%s:%s", os.Getenv("IP"), os.Getenv("PORT"))
 	fmt.Printf("Starting server at %s \n", sa)
 	return r.Run(sa)
