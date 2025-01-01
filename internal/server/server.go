@@ -7,9 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// The actual server engine
-var engine gin.Engine
-
 // `Spawn` starts a server at a designated address on the
 // host machine. If there is a failure, it returns an `error`.
 func Spawn() error {

@@ -77,7 +77,6 @@ func postLogin(c *gin.Context) {
 		return
 	}
 	c.SetSameSite(http.SameSiteLaxMode)
-	// TODO: Protect this?
 	c.SetCookie("Authorization", toks, 3600*24, "", "", false, true)
 
 	// Redirect to `/`
