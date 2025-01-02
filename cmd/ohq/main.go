@@ -2,9 +2,6 @@ package main
 
 import (
 	"log"
-	"os"
-	"os/signal"
-	"syscall"
 
 	"github.com/joho/godotenv"
 
@@ -15,42 +12,20 @@ import (
 
 // System initialization
 func init() {
-	// Environment variables
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-
-	// DB
-	db.Spawn()
-
-	// CLI
-	cli.Init()
 }
 
 // Server entry
 func main() {
-	// Set up an exit channel
-	//
-	// When I send a SIGTERM to this server,
-	// I want it to exit gracefully. So I'll have to
-	// set that up here.
-	sc := make(chan os.Signal, 1)
-	signal.Notify(sc, os.Interrupt, syscall.SIGTERM)
-	go func() { // `deinit`
-		<-sc
-		log.Println("Executing `deinit`")
-		db.Close()
-		os.Exit(0)
-	}()
-
-	// Load student list
-	if cli.LSL {
+	cli.Init()
+	if cli.LSL { // Need to load list?
 		db.LoadFromFile("students.yaml")
 	}
 
-	// Spawn the server
-	if err := server.Spawn(); err != nil {
-		log.Fatal("OHQ server shut down")
-	}
+	// Spawn the db + server connections
+	db.Spawn()
+	server.Spawn()
 }

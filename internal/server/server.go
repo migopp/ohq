@@ -2,14 +2,16 @@ package server
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/gin-gonic/gin"
 )
 
 // `Spawn` starts a server at a designated address on the
-// host machine. If there is a failure, it returns an `error`.
-func Spawn() error {
+// host machine. This blocks the main goroutine until the
+// server fails.
+func Spawn() {
 	// Configure the router
 	//
 	// Basically, set up the controllers for each acceptable request type.
@@ -38,5 +40,7 @@ func Spawn() error {
 	r.SetTrustedProxies(nil)
 	sa := fmt.Sprintf("%s:%s", os.Getenv("IP"), os.Getenv("PORT"))
 	fmt.Printf("Starting server at %s \n", sa)
-	return r.Run(sa)
+	if err := r.Run(sa); err != nil {
+		log.Fatalf("Server shut down: %v", err)
+	}
 }
